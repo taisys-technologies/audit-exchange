@@ -208,7 +208,11 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
         emit SetEthRateEvent(ethRate);
     }
 
-    function setERC20TokenExchangeRate(uint256 tokenID, uint256 rate) external checkAdmin {
+    function setERC20TokenExchangeRate(uint256 tokenID, uint256 rate) 
+        external 
+        checkAdmin 
+        checkTokenIDExist(tokenID) 
+    {
         erc20Token[tokenID].tokenExchangeRate = rate;
         emit SetERC20ExchangeRateEvent(address(erc20Token[tokenID].tokenAddress), rate);
     }
