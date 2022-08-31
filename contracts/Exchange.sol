@@ -66,7 +66,7 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
             0,
             VegasONEAddress.symbol(),
             VegasONEAddress,
-            1 * 1e18,
+            1 * (10 ** VegasONEAddress.decimals()),
             10 ** VegasONEAddress.decimals(),
             false
         );
@@ -75,7 +75,7 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
             1,
             USDTAddress.symbol(),
             USDTAddress,
-            5 * 1e6,
+            5 * (10 ** USDTAddress.decimals()),
             10 ** USDTAddress.decimals(),
             true
         );
@@ -84,7 +84,7 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
             2,
             BUSDAddress.symbol(),
             BUSDAddress,
-            5 * 1e18,
+            5 * (10 ** BUSDAddress.decimals()),
             10 ** BUSDAddress.decimals(),
             true
         );
@@ -93,7 +93,7 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
             3,
             USDCAddress.symbol(),
             USDCAddress,
-            5 * 1e6,
+            5 * (10 ** USDCAddress.decimals()),
             10 ** USDCAddress.decimals(),
             true
         );
@@ -102,7 +102,7 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
             4,
             BNBAddress.symbol(),
             BNBAddress,
-            14750 * 1e18,
+            14750 * (10 ** BNBAddress.decimals()),
             10 ** BNBAddress.decimals(),
             true
         );
@@ -111,7 +111,7 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
             5,
             wBTCAddress.symbol(),
             wBTCAddress,
-            1 * 1e8,
+            1 * (10 ** wBTCAddress.decimals()),
             10 ** wBTCAddress.decimals(),
             true
         );
@@ -175,8 +175,8 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
     ) external checkIsEnableChange nonReentrant checkTokenIDExist(tokenID) {
         ERC20TOKEN memory token = erc20Token[tokenID];
         require(token.tokenStatus, "Exchange: This token can't exchange now.");
-        uint256 decimalsAdjust = (erc20Token[0].tokenDecimals / token.tokenDecimals);
-        uint256 vegasONEAmount = (amount * token.tokenExchangeRate / token.tokenDecimals) * decimalsAdjust;
+        uint256 vegasONEAmount = amount * erc20Token[0].tokenDecimals 
+            * token.tokenExchangeRate / token.tokenDecimals / token.tokenDecimals;
         require(vegasONEAmount >= exchangeMinValue, "Exchange: Minimum amount not reached.");
         require(token.tokenAddress.transferFrom(walletAddress, address(this), amount));
         require(erc20Token[0].tokenAddress.transfer(walletAddress, vegasONEAmount));
