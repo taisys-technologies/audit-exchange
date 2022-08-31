@@ -231,7 +231,7 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
         emit setExchangeMinValueEvent(exchangeMinValue);
     }
 
-    function isEnableExchange() public view returns (bool) {
+    function isEnableExchange() external view returns (bool) {
         return enableExchange;
     }
 }
