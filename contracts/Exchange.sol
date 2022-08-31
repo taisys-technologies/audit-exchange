@@ -75,7 +75,7 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
             1,
             USDTAddress.symbol(),
             USDTAddress,
-            5 * 1e18,
+            5 * 1e6,
             10 ** USDTAddress.decimals(),
             true
         );
@@ -93,7 +93,7 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
             3,
             USDCAddress.symbol(),
             USDCAddress,
-            5 * 1e18,
+            5 * 1e6,
             10 ** USDCAddress.decimals(),
             true
         );
@@ -111,7 +111,7 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
             5,
             wBTCAddress.symbol(),
             wBTCAddress,
-            1 * 1e13,
+            1 * 1e8,
             10 ** wBTCAddress.decimals(),
             true
         );
@@ -163,9 +163,8 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
 
     function ethToVegasONE(address walletAddress) external checkIsEnableChange nonReentrant payable {
         uint256 amount = msg.value * ethRate;
-        if (amount >= exchangeMinValue){
-            require(erc20Token[0].tokenAddress.transfer(walletAddress, amount));
-        }
+        require(amount >= exchangeMinValue, "Exchange: Minimum amount not reached.");
+        require(erc20Token[0].tokenAddress.transfer(walletAddress, amount));
         emit EthExchangeEvnet(walletAddress, msg.value, amount);
     }
 
@@ -176,11 +175,11 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
     ) external checkIsEnableChange nonReentrant checkTokenIDExist(tokenID) {
         ERC20TOKEN memory token = erc20Token[tokenID];
         require(token.tokenStatus, "Exchange: This token can't exchange now.");
-        uint256 vegasONEAmount = amount * token.tokenExchangeRate / token.tokenDecimals;
+        uint256 decimalsAdjust = (erc20Token[0].tokenDecimals / token.tokenDecimals);
+        uint256 vegasONEAmount = (amount * token.tokenExchangeRate / token.tokenDecimals) * decimalsAdjust;
+        require(vegasONEAmount >= exchangeMinValue, "Exchange: Minimum amount not reached.");
         require(token.tokenAddress.transferFrom(walletAddress, address(this), amount));
-        if (vegasONEAmount >= exchangeMinValue){
-            require(erc20Token[0].tokenAddress.transfer(walletAddress, vegasONEAmount));
-        }
+        require(erc20Token[0].tokenAddress.transfer(walletAddress, vegasONEAmount));
         emit ERC20TokenExchangeEvnet(
             token.tokenAddress,
             walletAddress,
