@@ -136,6 +136,11 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
         _;
     }
 
+    modifier checkAdress(address account) {
+        require(account != address(0), "Exchange: Address can not be a zero address.");
+        _;
+    }
+
     function addERC20Token(
         ERC20 tokenAddress,
         uint256 tokenExchangeRate,
@@ -188,7 +193,7 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
         );
     }
 
-    function ethWithdraw(address to, uint256 amount) external checkAdmin nonReentrant {
+    function ethWithdraw(address to, uint256 amount) external checkAdmin checkAdress(to) nonReentrant {
         payable(to).transfer(amount);
         emit EthDrawEvent(to , amount);
     }
@@ -197,7 +202,7 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
         uint256 tokenID,
         address to,
         uint256 amount
-    ) external checkAdmin nonReentrant checkTokenIDExist(tokenID) {
+    ) external checkAdmin checkAdress(to) checkTokenIDExist(tokenID) nonReentrant {
         require(erc20Token[tokenID].tokenAddress.transfer(to, amount));
         emit ERC20DrawEvent(address(erc20Token[tokenID].tokenAddress), to, amount);
     }
