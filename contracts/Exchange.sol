@@ -5,12 +5,15 @@ pragma solidity 0.8.4;
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /// @title Exchange
 ///
 /// @dev This contract is to exchange ETH or others erc20 token for VegasONE.
 contract Exchange is AccessControlEnumerable, ReentrancyGuard {
 
+    using SafeERC20 for IERC20;
+    
     /**
      * Global Variables, Struct
      */
@@ -21,7 +24,7 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
     struct ERC20TOKEN {
         uint256 tokenID;
         string tokenSymbol;
-        ERC20 tokenAddress;
+        IERC20 tokenAddress;
         uint256 tokenExchangeRate;
         uint256 tokenDecimals;
         bool tokenStatus;
@@ -57,7 +60,7 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
     );
     event EthExchangeEvnet(address indexed from, uint256 ethAmount, uint256 vegasONEAmount);
     event ERC20TokenExchangeEvnet(
-        ERC20 indexed tokenAddress,
+        IERC20 indexed tokenAddress,
         address indexed from,
         uint256 tokenAmount,
         uint256 vegasONEAmount
@@ -77,8 +80,8 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
     constructor(
         ERC20 VegasONEAddress,
         ERC20 USDTAddress,
-        ERC20 BUSDAddress,
         ERC20 USDCAddress,
+        ERC20 BUSDAddress,
         ERC20 BNBAddress,
         ERC20 wBTCAddress
     ){
@@ -100,26 +103,26 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
             1,
             USDTAddress.symbol(),
             USDTAddress,
-            5 * (10 ** USDTAddress.decimals()),
+            14 * (10 ** USDTAddress.decimals()),
             10 ** USDTAddress.decimals(),
             true
         );
-        //BUSD 0x4Fabb145d64652a948d72533023f6E7A623C7C53
+        //USDC 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
         erc20Token[2] = ERC20TOKEN(
             2,
-            BUSDAddress.symbol(),
-            BUSDAddress,
-            5 * (10 ** BUSDAddress.decimals()),
-            10 ** BUSDAddress.decimals(),
-            true
-        );
-        //USDC 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
-        erc20Token[3] = ERC20TOKEN(
-            3,
             USDCAddress.symbol(),
             USDCAddress,
-            5 * (10 ** USDCAddress.decimals()),
+            14 * (10 ** USDCAddress.decimals()),
             10 ** USDCAddress.decimals(),
+            true
+        );
+        //BUSD 0x4Fabb145d64652a948d72533023f6E7A623C7C53
+        erc20Token[3] = ERC20TOKEN(
+            3,
+            BUSDAddress.symbol(),
+            BUSDAddress,
+            14 * (10 ** BUSDAddress.decimals()),
+            10 ** BUSDAddress.decimals(),
             true
         );
         //BNB 0xB8c77482e45F1F44dE1745F52C74426C631bDD52
@@ -127,7 +130,7 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
             4,
             BNBAddress.symbol(),
             BNBAddress,
-            14750 * (10 ** BNBAddress.decimals()),
+            3920 * (10 ** BNBAddress.decimals()),
             10 ** BNBAddress.decimals(),
             true
         );
@@ -136,13 +139,13 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
             5,
             wBTCAddress.symbol(),
             wBTCAddress,
-            1 * (10 ** wBTCAddress.decimals()),
+            285714 * (10 ** wBTCAddress.decimals()),
             10 ** wBTCAddress.decimals(),
             true
         );
 
         exchangeMinValue = 1e18;
-        ethRate = 1;
+        ethRate = 22857;
         tokenCount = 6;
     }
 
@@ -219,7 +222,7 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
     function ethToVegasONE(address walletAddress) external checkIsEnableChange nonReentrant payable {
         uint256 amount = msg.value * ethRate;
         require(amount >= exchangeMinValue, "Exchange: Minimum amount not reached.");
-        require(erc20Token[0].tokenAddress.transfer(walletAddress, amount));
+        erc20Token[0].tokenAddress.safeTransfer(walletAddress, amount);
         emit EthExchangeEvnet(walletAddress, msg.value, amount);
     }
 
@@ -243,9 +246,9 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
             * token.tokenExchangeRate / token.tokenDecimals / token.tokenDecimals;
         require(vegasONEAmount >= exchangeMinValue, "Exchange: Minimum amount not reached.");
         // transfer erc20 token to contract.
-        require(token.tokenAddress.transferFrom(walletAddress, address(this), amount));
+        erc20Token[tokenID].tokenAddress.safeTransferFrom(walletAddress, address(this), amount);
         // transfer VegasONE to walletAddress.
-        require(erc20Token[0].tokenAddress.transfer(walletAddress, vegasONEAmount));
+        erc20Token[0].tokenAddress.safeTransfer(walletAddress, vegasONEAmount);
         emit ERC20TokenExchangeEvnet(
             token.tokenAddress,
             walletAddress,
@@ -277,7 +280,7 @@ contract Exchange is AccessControlEnumerable, ReentrancyGuard {
         address to,
         uint256 amount
     ) external checkAdmin checkAdress(to) checkTokenIDExist(tokenID) nonReentrant {
-        require(erc20Token[tokenID].tokenAddress.transfer(to, amount));
+        erc20Token[tokenID].tokenAddress.safeTransfer(to, amount);
         emit ERC20DrawEvent(address(erc20Token[tokenID].tokenAddress), to, amount);
     }
 
