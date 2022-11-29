@@ -1,4 +1,4 @@
-# audit-exchange
+# Audit Exchange
 
 The purpose of this contract is to change ETH or other ERC20 token into VegasONE. In order to achieve the goal, there are various settings in the contract, such as exchange rates, switches, etc.
 
@@ -54,3 +54,36 @@ This function is provided for administrators to modify the minimum amount to exc
 ### setTokenExchangeStatus **onlyAdmin**
 
 This function is provided for administrators to modify whether the selected erc20 tokens are open to exchange for VegasONE.
+
+## Document
+
+- [Notion](https://nonstop-krypton-90d.notion.site/Taisys-44efb30c8f5442128990f909e47b4fd4)
+
+## Test
+
+### Setup
+
+```bash
+npm install
+```
+
+### Run
+
+```bash
+# run all tests
+npx hardhat test
+
+# run single test
+npx hardhat test ${TEST_FILE_PATH}
+
+# run test with coverage report
+npx hardhat coverage
+```
+
+### Static Analysis
+
+[Slither Github](https://github.com/crytic/slither)
+
+```bash
+slither .
+```
