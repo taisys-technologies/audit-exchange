@@ -58,6 +58,7 @@ This function is provided for administrators to modify whether the selected erc2
 ## Document
 
 - [Notion](https://nonstop-krypton-90d.notion.site/Taisys-44efb30c8f5442128990f909e47b4fd4)
+- [Audit Report](./audit/)
 
 ## Test
 
@@ -76,13 +77,13 @@ npx hardhat test
 # run single test
 npx hardhat test ${TEST_FILE_PATH}
 
-# run test with coverage report
+# run tests with coverage report
 npx hardhat coverage
 ```
 
-### Static Analysis
+## Static Analysis
 
-[Slither Github](https://github.com/crytic/slither)
+- [Slither Github](https://github.com/crytic/slither)
 
 ```bash
 slither .
